@@ -16,11 +16,19 @@ for aa in code_tree:
 
 top_imported = set()
 id=set()
-file_open = set()
+file_open = {}
 fopen=False
 
 prev_Name = None
 variable_dict ={}
+
+stack_patterns={}
+stack_patterns['open']=[ast.Name,ast.Name,ast.Constant]
+
+stack_patterns['open']=[ast.Name,ast.Constant,ast.Constant]
+
+
+
 
 def is_variable(node,prev_Name):
 
@@ -34,9 +42,30 @@ def is_variable(node,prev_Name):
        return node.id
     return None
 
+
+def is_open(node,isopen):
+
+    if isinstance(node,ast.Name) and node.id=='open':
+        return True
+    if isinstance(node,ast.Name) and isopen:
+        file_open[node.id]=variable_dict[node.id]
+        print("xxxxxxxxxxx------",variable_dict[node.id])
+        
+         
+    return False
 for node in ast.walk(parsed_code):
     print("\n\t",node,"\n\t\t",node.__dict__)
+    if hasattr(node,'level'):
+        print(node.level)
+
+
     prev_Name=is_variable(node,prev_Name)
+    fopen=is_open(node,fopen)
+
+
+
+
+
     if isinstance(node, ast.Import):
         for name in node.names:
             top_imported.add(name.name.split('.')[0])
@@ -51,12 +80,7 @@ for node in ast.walk(parsed_code):
         print("----",node.__dict__)
         for a in node.body:
             print("------>",a)
-
-    if fopen and isinstance(node,ast.Name):
-        
-
-        file_open.add(node.id)
-        fopen=False
+ 
     
    
     if isinstance(node,ast.Name):
@@ -72,12 +96,12 @@ for node in ast.walk(parsed_code):
 with open('test_flow.md','w',encoding='utf8') as f:
     f.writelines("```mermaid\ngraph TD\n")
     for a in top_imported:
-        f.writelines(f"{a}-->|imports|{__file__}\n")
+        f.writelines(f"{a}-->|imports<br>|{__file__}\n")
         print()
     # for a,v in variable_dict.items():
-    #     f.writelines(f"{a}-->|{v}|{__file__}\n")
+    #     f.writelines(f"{a}-->|variable<br>{v}|{__file__}\n")
     #     print(f"{a}-->{__file__}")
-    for a in file_open:
-        f.writelines(f"{a}-->{__file__}\n")
-        print(f"{a}-->{__file__}")
+    for k,v in file_open.items():
+        f.writelines(f"{k}-->|{v}|{__file__}\n")
+         
     f.writelines("```\n")
