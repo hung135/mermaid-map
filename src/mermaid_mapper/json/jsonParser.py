@@ -2,25 +2,34 @@ import sys
 import json
 import random
 
+ignore_list=[ 
+            "end_col_offset",
+            "end_lineno", 
+            "lineno","col_offset","end_col_offset"
+                        ]
+
 def traverseJson(data, mermaidOutput, parent):
     if isinstance(data, dict):
         for key, val in data.items():
-            #print(key)
-            keyId = str(random.randint(0, 10000))
-            mermaidOutput.append("{0}[\"{1}\"]\n".format(keyId, key))
-            mermaidOutput.append("{0}-->{1}\n".format(keyId, parent[1]))
+            if key not in ignore_list:
+                #print(key)
+                keyId = str(random.randint(0, 10000))
+                
+                mermaidOutput.append("{0}[\"{1}\"]\n".format(keyId, key))
+                mermaidOutput.append("{0}-->{1}\n".format(keyId, parent[1]))
 
-            if isinstance(val, dict):
-                traverseJson(val, mermaidOutput, (key, keyId))
-            elif isinstance(val, list):
-                traverseJson(val, mermaidOutput, (key, keyId))
-            else:
-                valId = str(random.randint(0, 10000))
-                mermaidOutput.append("{0}[\"{1}\"]\n".format(valId, val))
-                mermaidOutput.append("{0}-->{1}\n".format(valId, keyId))
+                if isinstance(val, dict):
+                    traverseJson(val, mermaidOutput, (key, keyId))
+                elif isinstance(val, list):
+                    traverseJson(val, mermaidOutput, (key, keyId))
+                else:
+                    valId = str(random.randint(0, 10000))
+                    mermaidOutput.append("{0}[\"{1}\"]\n".format(valId, val))
+                    mermaidOutput.append("{0}-->{1}\n".format(valId, keyId))
     else:
         for i in range(len(data)):
             id = str(random.randint(0, 10000))
+            
             mermaidOutput.append("{0}[\"{1}\"]\n".format(id, i))
             mermaidOutput.append("{0}-->{1}\n".format(id, parent[1]))
 
