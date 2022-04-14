@@ -14,7 +14,7 @@ sql-->simple_ddl-parser-->json
     json-->MSSQL-->flow_chart.md
     json-->STOREPROC-->flow_chart.md
     json-->Python-->flow_chart.md
-    pythonfile--->dict--->json
+    pythonfile--->|ast2json|json
  
 
 ```
