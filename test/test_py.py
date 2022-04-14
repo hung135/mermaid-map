@@ -1,4 +1,5 @@
 import ast
+ 
 
 code = ast.parse("print('Hello world!')")
 print(ast.dump(code))
@@ -53,55 +54,90 @@ def is_open(node,isopen):
         
          
     return False
-for node in ast.walk(parsed_code):
-    print("\n\t",node,"\n\t\t",node.__dict__)
-    if hasattr(node,'level'):
-        print(node.level)
+
+def test1():
+    for node in ast.walk(parsed_code):
+        print("\n\t",node,"\n\t\t",node.__dict__)
+        if hasattr(node,'level'):
+            print(node.level)
 
 
-    prev_Name=is_variable(node,prev_Name)
-    fopen=is_open(node,fopen)
+        prev_Name=is_variable(node,prev_Name)
+        fopen=is_open(node,fopen)
 
 
 
 
 
-    if isinstance(node, ast.Import):
-        for name in node.names:
-            top_imported.add(name.name.split('.')[0])
-    elif isinstance(node, ast.ImportFrom):
-        if node.level > 0:
-            # Relative imports always refer to the current package.
-            continue
-        assert node.module
-        top_imported.add(node.module.split('.')[0])
-    if isinstance(node,ast.With):
-         
-        print("----",node.__dict__)
-        for a in node.body:
-            print("------>",a)
- 
-    
-   
-    if isinstance(node,ast.Name):
-        #id.add(node.id)
-        print("-----",node.__dict__)
-        if hasattr(node, 'ctx'):
-            print("-----------",type(node.ctx))
-        if node.id=='open':
+        if isinstance(node, ast.Import):
+            for name in node.names:
+                top_imported.add(name.name.split('.')[0])
+        elif isinstance(node, ast.ImportFrom):
+            if node.level > 0:
+                # Relative imports always refer to the current package.
+                continue
+            assert node.module
+            top_imported.add(node.module.split('.')[0])
+        if isinstance(node,ast.With):
             
-            fopen=True
+            print("----",node.__dict__)
+            for a in node.body:
+                print("------>",a)
+    
+        
+    
+        if isinstance(node,ast.Name):
+            #id.add(node.id)
+            print("-----",node.__dict__)
+            if hasattr(node, 'ctx'):
+                print("-----------",type(node.ctx))
+            if node.id=='open':
+                
+                fopen=True
 
 
-with open('test_flow.md','w',encoding='utf8') as f:
-    f.writelines("```mermaid\ngraph TD\n")
-    for a in top_imported:
-        f.writelines(f"{a}-->|imports<br>|{__file__}\n")
-        print()
-    # for a,v in variable_dict.items():
-    #     f.writelines(f"{a}-->|variable<br>{v}|{__file__}\n")
-    #     print(f"{a}-->{__file__}")
-    for k,v in file_open.items():
-        f.writelines(f"{k}-->|{v}|{__file__}\n")
-         
-    f.writelines("```\n")
+    with open('test_flow.md','w',encoding='utf8') as f:
+        f.writelines("```mermaid\ngraph TD\n")
+        for a in top_imported:
+            f.writelines(f"{a}-->|imports<br>|{__file__}\n")
+            print()
+        # for a,v in variable_dict.items():
+        #     f.writelines(f"{a}-->|variable<br>{v}|{__file__}\n")
+        #     print(f"{a}-->{__file__}")
+        for k,v in file_open.items():
+            f.writelines(f"{k}-->|{v}|{__file__}\n")
+            
+        f.writelines("```\n")
+
+def test2():
+    import ast
+    from pprint import pprint
+
+    class AwaitVisitor(ast.NodeVisitor):
+        def visit_Await(self, node):
+            print('Node type: Await\nFields: ', node._fields)
+            self.generic_visit(node)
+
+        def visit_Call(self,node):
+            print('Node type: Call\nFields: ', node._fields)
+            ast.NodeVisitor.generic_visit(self, node)
+
+        def visit_Name(self,node):
+            print('Node type: Name\nFields: ', node._fields)
+            ast.NodeVisitor.generic_visit(self, node)
+
+
+    visitor = AwaitVisitor()
+  
+    pprint(ast.dump(parsed_code))
+    visitor.visit(parsed_code)
+
+def test3():
+    import json
+    from ast import parse
+    from ast2json import ast2json
+
+    ast = ast2json(parse(open(PY_FILE).read()))
+    print(json.dumps(ast, indent=4))
+
+test3()

@@ -1,3 +1,4 @@
+```mermaid
 graph TD
 4326[data.json]
 6961[squadName]
@@ -114,3 +115,4 @@ graph TD
 4181-->3830
 3911[Interdimensional travel]
 3911-->4181
+```
