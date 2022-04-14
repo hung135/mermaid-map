@@ -11,9 +11,9 @@ graph TD
      
 
 json-->flow_chart.md
-sql-->|simple_ddl-parser|json
-yaml-->|PyYAML|json
-pythonfile--->|ast2json|json
+A["SQL file"]-->|simple_ddl-parser|json
+B["YAML file"]-->|PyYAML|json
+C[".PY File"]--->|ast2json|json
     json-->kubn-->flow_chart.md
     json-->MSSQL-->flow_chart.md    
     json-->ANSI-SQL-->flow_chart.md
