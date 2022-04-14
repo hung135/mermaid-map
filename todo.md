@@ -3,8 +3,10 @@ graph TD
     subgraph dialetc
      kubn
      MSSQL
-     STOREPROC
+     TSQL
      Python
+     PL/SQL
+     ANSI-SQL
     end
      
 
@@ -16,8 +18,7 @@ pythonfile--->|ast2json|json
     json-->MSSQL-->flow_chart.md    
     json-->ANSI-SQL-->flow_chart.md
     json-->PL/SQL-->flow_chart.md
-    
-    json-->STOREPROC-->flow_chart.md
+    json-->TSQL-->flow_chart.md
     json-->Python-->flow_chart.md
 
  
