@@ -34,8 +34,8 @@ class JSONToMermaid:
 
     def _setup_mermaid(self) -> None:
         """Sets mermaid output up"""
-        self.mermaid.append(["graph TD\n"])
-        self.mermaid.append(f'["{self.json_file_loc}"]')
+        self.mermaid.append("graph TD\n")
+        self.mermaid.append(f'{self.file_id}["{self.json_file_loc}"]\n')
 
     def pipeline(self) -> None:
         self.traverse(self.json, (self.json_file_loc, self.file_id))
