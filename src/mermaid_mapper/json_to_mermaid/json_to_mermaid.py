@@ -13,9 +13,10 @@ IGNORE = [
     "col_offset",
     "end_col_offset",
     "ctx",
-    "id",
+    "id","type_comment"
 ]
-
+NOT_IGNORE = [("_type","Name"),
+("_type","Module")]
 
 class JSONToMermaid:
     """
@@ -25,7 +26,7 @@ class JSONToMermaid:
     json: dict
     mermaid: list = []
     file_id: int
-
+    JSONPath=set()
     def __init__(self, json_file_loc: str):
         self.file_id = str(random.randint(0, 10000))
         self.json_file_loc = json_file_loc
@@ -40,6 +41,7 @@ class JSONToMermaid:
     def pipeline(self) -> None:
         self.traverse(self.json, (self.json_file_loc, self.file_id))
         self.mermaid_output()
+        print(self.JSONPath)
 
     def load_json(self) -> None:
         """Loads the json file"""
@@ -70,33 +72,42 @@ class JSONToMermaid:
         self.mermaid.append(f'{box[0]}["{box[1]}"]\n')
         self.mermaid.append(f"{arrow[0]}-->{arrow[1]}\n")
 
-    def traverse(self, data: Union[dict, list], parent_node: Tuple[str, str]) -> None:
+    def traverse(self, data: Union[dict, list], parent_node: Tuple[str, str],depth='') -> None:
         """Traverse the JSON file, parsing the ast into a mermaid format
 
         :param Union[dict, list] data: Data to recursively parse
         :param Tuple[str,str] parent_node: Parent node to review
-        """
+        """ 
         if isinstance(data, dict):
             for key, val in data.items():
+                curr_path=depth+'.'+key
+                self.JSONPath.add(curr_path)
+                
                 if key not in IGNORE:
+                    
                     key_id = str(random.randint(0, 10000))
                     self._mermaid_add((key_id, key), (key_id, parent_node[1]))
 
                     if isinstance(val, dict) or isinstance(val, list):
-                        self.traverse(val, (key, key_id))
+                        self.traverse(val, (key, key_id),curr_path)
                     else:
                         val_id = str(random.randint(0, 10000))
                         self._mermaid_add((val_id, val), (val_id, key_id))
 
         else:
+
             for i, element in enumerate(data):
+                
                 _id = str(random.randint(0, 10000))
                 self._mermaid_add((_id, i), (_id, parent_node[1]))
 
                 if isinstance(element, dict) or isinstance(element, list):
-                    self.traverse(element, (i, _id))
+                    curr_path=depth
+                    self.JSONPath.add(curr_path)
+                    self.traverse(element, (i, _id),curr_path)
                 else:
                     val_id = str(random.randint(0, 10000))
+                    
                     self._mermaid_add((val_id, element), (val_id, _id))
 
 
@@ -105,3 +116,4 @@ if __name__ == "__main__":
 
     test = JSONToMermaid(sys.argv[1])
     test.pipeline()
+    
