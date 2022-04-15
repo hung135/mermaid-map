@@ -82,9 +82,7 @@ class JSONToMermaid:
                     key_id = str(random.randint(0, 10000))
                     self._mermaid_add((key_id, key), (key_id, parent_node[1]))
 
-                    if isinstance(val, dict):
-                        self.traverse(val, (key, key_id))
-                    elif isinstance(val, list):
+                    if isinstance(val, dict) or isinstance(val, list):
                         self.traverse(val, (key, key_id))
                     else:
                         val_id = str(random.randint(0, 10000))
@@ -95,9 +93,7 @@ class JSONToMermaid:
                 _id = str(random.randint(0, 10000))
                 self._mermaid_add((_id, i), (_id, parent_node[1]))
 
-                if isinstance(element, dict):
-                    self.traverse(element, (i, _id))
-                elif isinstance(element, list):
+                if isinstance(element, dict) or isinstance(element, list):
                     self.traverse(element, (i, _id))
                 else:
                     val_id = str(random.randint(0, 10000))
