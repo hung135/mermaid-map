@@ -26,19 +26,16 @@ class JSONToMermaid:
     mermaid: list = []
     file_id: int
 
-    def __init__(self, json_file_loc: str, parsing_k8s: bool=False, subgraph_title: str="Node"):
+    def __init__(self, json_file_loc: str):
         self.file_id = str(random.randint(0, 10000))
         self.json_file_loc = json_file_loc
         self.load_json()
-        self._setup_mermaid(parsing_k8s, subgraph_title)
+        self._setup_mermaid()
 
-    def _setup_mermaid(self, parsing_k8s: bool=False, node_title: str="Node") -> None:
+    def _setup_mermaid(self) -> None:
         """Sets mermaid output up"""
         self.mermaid.append("graph TD\n")
-        if parsing_k8s: 
-            self.mermaid.append(f'subgraph {node_title}\n')
-        else:
-            self.mermaid.append(f'{self.file_id}["{self.json_file_loc}"]\n')
+        self.mermaid.append(f'{self.file_id}["{self.json_file_loc}"]\n')
 
     def pipeline(self) -> None:
         self.traverse(self.json, (self.json_file_loc, self.file_id))
@@ -57,12 +54,11 @@ class JSONToMermaid:
             return _match[0].value
         return None
 
-    def mermaid_output(self, parsing_k8s: bool=False) -> None:
+    def mermaid_output(self) -> None:
         """Ouputs the mermaid representation of the JSON file"""
         with open("output.md", "w") as _out:
             _out.writelines("```mermaid\n")
             _out.writelines(map(str, self.mermaid))
-            if parsing_k8s: _out.writelines(f'end\n')
             _out.writelines("\n```\n")
 
     def _mermaid_add(self, box: MermTuple, arrow: MermTuple) -> None:
