@@ -10,11 +10,8 @@ class K8SParser:
         self.service_parser = None
         self.deployment_parser = None
         self.load_yaml()
-        print(self.deployment_parser.json)
-        print(self.service_parser.json)
     
     def load_yaml(self):
-        i = 0
         for path in self.yaml_file_paths:
             with open(path, 'r') as yaml_file, open("output.json", 'w') as json_file:
                 yaml_contents = yaml.safe_load(yaml_file)
@@ -25,7 +22,6 @@ class K8SParser:
                 self.deployment_parser = parsed_json
             elif parsed_json.json["kind"] == "Service":
                 self.service_parser = parsed_json
-            i += 1
     
     def setup_deployment_visualization(self):
         pod_count = int(self.deployment_parser.json["spec"]["replicas"])
@@ -77,7 +73,6 @@ class K8SParser:
 
 if __name__ == "__main__":
     import sys
-    print(sys.argv[1::])
     test = K8SParser(sys.argv[1::])
     test.setup_deployment_visualization()
     test.setup_service_visualization()
