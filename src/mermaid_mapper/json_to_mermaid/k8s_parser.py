@@ -4,46 +4,82 @@ import random
 from json_to_mermaid import JSONToMermaid
 
 class K8SParser:
-    def __init__(self, yaml_file_path: str):
-        self.yaml_file_path = yaml_file_path
+    def __init__(self, yaml_file_paths: list):
+        self.yaml_file_paths = yaml_file_paths
         self.pod_list = {}
+        self.service_parser = None
+        self.deployment_parser = None
         self.load_yaml()
+        print(self.deployment_parser.json)
+        print(self.service_parser.json)
     
     def load_yaml(self):
-        with open(self.yaml_file_path, 'r') as yaml_file, open("output.json", 'w') as json_file:
-            yaml_contents = yaml.safe_load(yaml_file)
-            json.dump(yaml_contents, json_file, indent=4)
-            
-        self.json_parser = JSONToMermaid("output.json", True)
+        i = 0
+        for path in self.yaml_file_paths:
+            with open(path, 'r') as yaml_file, open("output.json", 'w') as json_file:
+                yaml_contents = yaml.safe_load(yaml_file)
+                json.dump(yaml_contents, json_file, indent=4)
+
+            parsed_json = JSONToMermaid("output.json")
+            if parsed_json.json["kind"] == "Deployment":
+                self.deployment_parser = parsed_json
+            elif parsed_json.json["kind"] == "Service":
+                self.service_parser = parsed_json
+            i += 1
     
     def setup_deployment_visualization(self):
-        pod_count = int(self.json_parser.json["spec"]["replicas"])
-        pod_container_image = self.json_parser.json["spec"]["template"]["spec"]["containers"][0]["image"]
-        container_list = self.json_parser.json["spec"]["template"]["spec"]["containers"]
+        pod_count = int(self.deployment_parser.json["spec"]["replicas"])
+        pod_container_image = self.deployment_parser.json["spec"]["template"]["spec"]["containers"][0]["image"]
+        container_list = self.deployment_parser.json["spec"]["template"]["spec"]["containers"]
 
         for i in range(pod_count):
             pod_id = str(random.randint(0, 10000))
-            self.json_parser.mermaid.append(f'{pod_id}["Pod {i}"]\n')
+            self.deployment_parser.mermaid.append(f'{pod_id}["Pod {i}"]\n')
 
             for container in container_list:
                 container_id = str(random.randint(0, 10000))
-                self.json_parser.mermaid.append(f'{container_id}["container image: {pod_container_image}"]\n')
-                self.json_parser.mermaid.append(f'{container_id}-->|"port list: {container["ports"]}"|{pod_id}\n')
+                self.deployment_parser.mermaid.append(f'{container_id}["container image: {pod_container_image}"]\n')
+                self.deployment_parser.mermaid.append(f'{container_id}-->|"port list: {container["ports"]}"|{pod_id}\n')
             
-            self.pod_list[pod_id] = (self.json_parser.json["spec"]["selector"]["matchLabels"])
+            self.pod_list[pod_id] = (self.deployment_parser.json["spec"]["selector"]["matchLabels"],)
 
     def setup_service_visualization(self):
-        return
+        service_name = self.service_parser.json["metadata"]["name"]
+        selector_label = self.service_parser.json["spec"]["selector"]
+        service_target_port = self.service_parser.json["spec"]["ports"][0]["targetPort"]
+        service_id = str(random.randint(0, 10000))
+        self.service_parser.mermaid.append(f'{service_id}["{service_name}"]\n')
+
+        for key, val in self.pod_list.items():
+            if val[0] == selector_label:
+                self.service_parser.mermaid.append(f'{key}-->|"target port: {service_target_port}"|{service_id}\n')
 
     def create_mermaid(self):
-        self.json_parser.mermaid_output(parsing_k8s=True)
+        with open('outputr.md', 'w') as mermaid_output:
+            mermaid_output.write('```mermaid\ngraph TD\nsubgraph Node\n')
+            self.cleanup_parsers_mermaid()
 
+            if self.service_parser != None:
+                mermaid_output.writelines(self.service_parser.mermaid)
+            elif self.deployment_parser != None:
+                mermaid_output.writelines(self.deployment_parser.mermaid)
+
+            mermaid_output.write('end\n```')
+
+    def cleanup_parsers_mermaid(self):
+        if self.service_parser != None:
+            self.service_parser.mermaid.pop(0)
+            self.service_parser.mermaid.pop(0)
+        if self.deployment_parser != None:
+            self.deployment_parser.mermaid.pop(0)
+            self.deployment_parser.mermaid.pop(0)
 
 
 if __name__ == "__main__":
     import sys
-
-    test = K8SParser(sys.argv[1])
+    print(sys.argv[1::])
+    test = K8SParser(sys.argv[1::])
     test.setup_deployment_visualization()
+    test.setup_service_visualization()
     test.create_mermaid()
 
