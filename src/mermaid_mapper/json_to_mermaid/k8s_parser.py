@@ -11,7 +11,7 @@ class K8SParser:
         self.deployment_parser = None
         self.load_yaml()
     
-    def load_yaml(self):
+    def load_yaml(self) -> None:
         for path in self.yaml_file_paths:
             with open(path, 'r') as yaml_file, open("output.json", 'w') as json_file:
                 yaml_contents = yaml.safe_load(yaml_file)
@@ -23,7 +23,7 @@ class K8SParser:
             elif parsed_json.json["kind"] == "Service":
                 self.service_parser = parsed_json
     
-    def setup_deployment_visualization(self):
+    def setup_deployment_visualization(self) -> None:
         pod_count = int(self.deployment_parser.json["spec"]["replicas"])
         pod_container_image = self.deployment_parser.json["spec"]["template"]["spec"]["containers"][0]["image"]
         container_list = self.deployment_parser.json["spec"]["template"]["spec"]["containers"]
@@ -39,7 +39,7 @@ class K8SParser:
             
             self.pod_list[pod_id] = (self.deployment_parser.json["spec"]["selector"]["matchLabels"],)
 
-    def setup_service_visualization(self):
+    def setup_service_visualization(self) -> None:
         service_name = self.service_parser.json["metadata"]["name"]
         selector_label = self.service_parser.json["spec"]["selector"]
         service_target_port = self.service_parser.json["spec"]["ports"][0]["targetPort"]
@@ -50,7 +50,7 @@ class K8SParser:
             if val[0] == selector_label:
                 self.service_parser.mermaid.append(f'{key}-->|"target port: {service_target_port}"|{service_id}\n')
 
-    def create_mermaid(self):
+    def create_mermaid(self) -> None:
         with open('output.md', 'w') as mermaid_output:
             mermaid_output.write('```mermaid\ngraph TD\nsubgraph Node\n')
             self.cleanup_parsers_mermaid()
@@ -62,7 +62,7 @@ class K8SParser:
 
             mermaid_output.write('end\n```')
 
-    def cleanup_parsers_mermaid(self):
+    def cleanup_parsers_mermaid(self) -> None:
         if self.service_parser != None:
             self.service_parser.mermaid.pop(0)
             self.service_parser.mermaid.pop(0)
