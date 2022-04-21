@@ -51,7 +51,7 @@ class K8SParser:
                 self.service_parser.mermaid.append(f'{key}-->|"target port: {service_target_port}"|{service_id}\n')
 
     def create_mermaid(self):
-        with open('outputr.md', 'w') as mermaid_output:
+        with open('output.md', 'w') as mermaid_output:
             mermaid_output.write('```mermaid\ngraph TD\nsubgraph Node\n')
             self.cleanup_parsers_mermaid()
 
